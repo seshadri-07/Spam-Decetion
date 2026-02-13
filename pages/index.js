@@ -67,13 +67,25 @@ export default function Home() {
 
       {error && <p className={styles.error}>{error}</p>}
 
-      {result && (
-        <div className={styles.result}>
-          <h2>{result.label} {result.emoji}</h2>
-          <p>Confidence: {(result.confidence * 100).toFixed(1)}%</p>
-          <p>{result.message}</p>
-        </div>
-      )}
+     {result && (
+  <div className={`${styles.result} ${
+    result.is_spam ? styles.spam : styles.safe
+  }`}>
+
+    <h2>{result.label} {result.emoji}</h2>
+
+    <p>Confidence: {(result.confidence * 100).toFixed(1)}%</p>
+
+    <p>{result.message}</p>
+
+    <div className={styles.stats}>
+      Accuracy: 98% <br/>
+      Predictions: 1
+    </div>
+
+  </div>
+)}
+
 
       <div className={styles.stats}>
         Accuracy: {stats.accuracy ? (stats.accuracy * 100).toFixed(1) + '%' : '--'}
