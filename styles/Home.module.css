@@ -1,0 +1,30 @@
+.container {
+  text-align: center;
+  padding: 40px;
+  font-family: Arial;
+}
+
+textarea {
+  width: 300px;
+  height: 100px;
+  padding: 10px;
+  margin: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.result {
+  margin-top: 20px;
+  font-size: 20px;
+}
+
+.error {
+  color: red;
+}
+
+.stats {
+  margin-top: 20px;
+}
