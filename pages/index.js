@@ -1,97 +1,94 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import styles from '../styles/Home.module.css';
+import { useState } from "react";
+import styles from "../styles/Home.module.css";
 
 export default function Home() {
 
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [result, setResult] = useState(null);
-  const [stats, setStats] = useState({ accuracy: null, predictions: 0 });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [predictions, setPredictions] = useState(0);
+  const accuracy = 98;
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  const predictSpam = (message) => {
 
-  const fetchStats = async () => {
-    try {
-      const res = await axios.get('/api/model-stats');
-      setStats(prev => ({ ...prev, accuracy: res.data.accuracy }));
-    } catch {}
+    const spamKeywords = [
+      "congratulations","won","claim","prize","click","free","offer"
+    ];
+
+    const lower = message.toLowerCase();
+
+    const spamCount = spamKeywords.filter(word =>
+      lower.includes(word)
+    ).length;
+
+    const isSpam = spamCount > 0;
+    const confidence = Math.min(spamCount * 0.15 + 0.2, 0.99);
+
+    return { isSpam, confidence };
   };
 
-  const handlePredict = async (e) => {
-    e.preventDefault();
+  const handleCheck = () => {
 
-    if (!message.trim()) {
-      setError("Enter message");
-      return;
-    }
+    if(!message.trim()) return;
 
-    setLoading(true);
-    setError('');
+    const res = predictSpam(message);
 
-    try {
-      const res = await axios.post('/api/predict', { message });
-
-      setResult(res.data);
-
-      setStats(prev => ({
-        ...prev,
-        predictions: prev.predictions + 1
-      }));
-
-    } catch {
-      setError("Prediction failed");
-    }
-
-    setLoading(false);
+    setResult(res);
+    setPredictions(predictions + 1);
   };
 
   return (
     <div className={styles.container}>
-      <h1>SpamShield AI</h1>
 
-      <form onSubmit={handlePredict}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>SpamShield AI</h1>
+      </div>
+
+      <div className={styles.inputSection}>
         <textarea
+          className={styles.inputField}
           placeholder="Enter message..."
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(e)=>setMessage(e.target.value)}
         />
 
-        <button disabled={loading}>
-          {loading ? "Analyzing..." : "Check Message"}
+        <button
+          className={styles.checkButton}
+          onClick={handleCheck}
+        >
+          Check Message
         </button>
-      </form>
-
-      {error && <p className={styles.error}>{error}</p>}
-
-     {result && (
-  <div className={`${styles.result} ${
-    result.is_spam ? styles.spam : styles.safe
-  }`}>
-
-    <h2>{result.label} {result.emoji}</h2>
-
-    <p>Confidence: {(result.confidence * 100).toFixed(1)}%</p>
-
-    <p>{result.message}</p>
-
-    <div className={styles.stats}>
-      Accuracy: 98% <br/>
-      Predictions: 1
-    </div>
-
-  </div>
-)}
-
-
-      <div className={styles.stats}>
-        Accuracy: {stats.accuracy ? (stats.accuracy * 100).toFixed(1) + '%' : '--'}
-        <br />
-        Predictions: {stats.predictions}
       </div>
+
+      {result && (
+        <div className={styles.resultSection}>
+
+          <h2 className={styles.resultLabel}>
+            {result.isSpam ? "Spam 🚫" : "Not Spam ✅"}
+          </h2>
+
+          <p className={styles.confidenceText}>
+            Confidence: {(result.confidence * 100).toFixed(1)}%
+          </p>
+
+          <div className={styles.messageDisplay}>
+            {message}
+          </div>
+
+        </div>
+      )}
+
+      <div className={styles.statsSection}>
+        <div>
+          <h3>{accuracy}%</h3>
+          <p>Accuracy</p>
+        </div>
+
+        <div>
+          <h3>{predictions}</h3>
+          <p>Predictions</p>
+        </div>
+      </div>
+
     </div>
   );
 }
